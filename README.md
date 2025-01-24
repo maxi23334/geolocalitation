@@ -1,3 +1,11 @@
+# Mapa con Ubicación
+
+Haz clic en este enlace para ver el mapa interactivo con tu ubicación: [Ver Mapa](index.html)
+
+## Código HTML
+
+```html
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -20,7 +28,6 @@
     <script>
         let map;
 
-        // Función para obtener la ubicación
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -29,18 +36,15 @@
             }
         }
 
-        // Mostrar el mapa y la ubicación
         function showPosition(position) {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
 
-            // Mostrar las coordenadas
             document.getElementById("output").innerHTML = `
                 <p><strong>Latitud:</strong> ${lat}</p>
                 <p><strong>Longitud:</strong> ${lng}</p>
             `;
 
-            // Mostrar el mapa con la ubicación
             const location = { lat, lng };
             map = new google.maps.Map(document.getElementById("map"), {
                 center: location,
@@ -54,7 +58,6 @@
             });
         }
 
-        // Manejo de errores de geolocalización
         function showError(error) {
             switch (error.code) {
                 case error.PERMISSION_DENIED:
@@ -65,11 +68,4 @@
                     break;
                 case error.TIMEOUT:
                     alert("La solicitud para obtener la ubicación ha expirado.");
-                    break;
-                default:
-                    alert("Se produjo un error desconocido.");
-            }
-        }
-    </script>
-</body>
-</html>
+    
