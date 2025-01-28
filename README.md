@@ -1,71 +1,91 @@
-# Mapa con Ubicación
-
-Haz clic en este enlace para ver el mapa interactivo con tu ubicación: [Ver Mapa](index.html)
-
-## Código HTML
-
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa con Ubicación</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCgBKlv8-PhVtIt-QcZLwR9ZHpSTnugb8M"></script>
+    <title>Captura de Foto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        #map {
-            height: 500px; /* Altura del mapa */
-            width: 100%; /* Ancho del mapa */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #111;
+        }
+
+        video, canvas {
+            margin: 20px 0;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+
+        button {
+            background-color: #111;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>Mapa con Tu Ubicación</h1>
-    <button onclick="getLocation()">Mostrar Mi Ubicación</button>
-    <div id="output"></div>
-    <div id="map"></div>
-
+    <h1>Captura de Foto</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <button onclick="capturePhoto()">Capturar Foto</button>
     <script>
-        let map;
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
 
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("La geolocalización no es compatible con este navegador.");
-            }
+        // Solicitar acceso a la cámara frontal
+        navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user' } // 'user' para cámara frontal
+        })
+        .then((stream) => {
+            video.srcObject = stream;
+        })
+        .catch((error) => {
+            alert('No se pudo acceder a la cámara: ' + error.message);
+        });
+
+        // Capturar la foto
+        function capturePhoto() {
+            // Configurar el tamaño del canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Dibujar el cuadro actual del video en el canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convertir la imagen a datos base64 y descargarla
+            const imageData = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = imageData;
+            a.download = `foto_${new Date().toISOString().replace(/[:.-]/g, '_')}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
-
-        function showPosition(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            document.getElementById("output").innerHTML = `
-                <p><strong>Latitud:</strong> ${lat}</p>
-                <p><strong>Longitud:</strong> ${lng}</p>
-            `;
-
-            const location = { lat, lng };
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: location,
-                zoom: 15,
-            });
-
-            new google.maps.Marker({
-                position: location,
-                map: map,
-                title: "Tu ubicación",
-            });
-        }
-
-        function showError(error) {
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("El usuario denegó la solicitud de geolocalización.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("La información de ubicación no está disponible.");
-                    break;
-                case error.TIMEOUT:
-                    alert("La solicitud para obtener la ubicación ha expirado.");
-    
+    </script>
+</body>
+</html>
